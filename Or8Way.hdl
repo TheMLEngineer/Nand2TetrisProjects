@@ -1,0 +1,44 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/1/Or8Way.hdl
+/**
+ * Or8Way — 8-input OR gate.
+ *
+ * Takes 8 bits and outputs 1 if ANY of them is 1, else outputs 0.
+ * This is useful for checking "is anything here non-zero?"
+ *
+ * Think of it like 8 alarm sensors — if even one is triggered, the alarm goes off.
+ *
+ * out = in[0] OR in[1] OR in[2] OR in[3] OR in[4] OR in[5] OR in[6] OR in[7]
+ *
+ * Strategy: chain Or gates one at a time, accumulating the result.
+ * Each step asks "was anything true so far, OR is this next bit true?"
+ */
+CHIP Or8Way {
+    IN  in[8];
+    OUT out;
+
+    PARTS:
+
+    // Step 1: Is bit 0 OR bit 1 true?
+    Or(a=in[0], b=in[1], out=or01);
+
+    // Step 2: Was anything true so far, OR is bit 2 true?
+    Or(a=or01, b=in[2], out=or012);
+
+    // Step 3: Was anything true so far, OR is bit 3 true?
+    Or(a=or012, b=in[3], out=or0123);
+
+    // Step 4: Was anything true so far, OR is bit 4 true?
+    Or(a=or0123, b=in[4], out=or01234);
+
+    // Step 5: Was anything true so far, OR is bit 5 true?
+    Or(a=or01234, b=in[5], out=or012345);
+
+    // Step 6: Was anything true so far, OR is bit 6 true?
+    Or(a=or012345, b=in[6], out=or0123456);
+
+    // Step 7: Was anything true so far, OR is bit 7 true?
+    Or(a=or0123456, b=in[7], out=out);
+}

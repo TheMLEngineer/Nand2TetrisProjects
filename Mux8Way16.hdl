@@ -1,0 +1,55 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/1/Mux8Way16.hdl
+/**
+ * Mux8Way16 — 8-way 16-bit Multiplexer.
+ *
+ * Chooses ONE of eight 16-bit inputs (a..h) based on a 3-bit sel.
+ *
+ * sel is 3 bits, giving 8 possible combinations:
+ *   sel=000 → out = a
+ *   sel=001 → out = b
+ *   sel=010 → out = c
+ *   sel=011 → out = d
+ *   sel=100 → out = e
+ *   sel=101 → out = f
+ *   sel=110 → out = g
+ *   sel=111 → out = h
+ *
+ * Strategy: THREE rounds of elimination (tournament bracket)
+ *
+ *   Round 1 (sel[0]): pick one from each pair
+ *     a vs b → AB
+ *     c vs d → CD
+ *     e vs f → EF
+ *     g vs h → GH
+ *
+ *   Round 2 (sel[1]): pick one from each pair of winners
+ *     AB vs CD → ABCD
+ *     EF vs GH → EFGH
+ *
+ *   Round 3 (sel[2]): pick the final champion
+ *     ABCD vs EFGH → out
+ */
+CHIP Mux8Way16 {
+    IN  a[16], b[16], c[16], d[16],
+        e[16], f[16], g[16], h[16],
+        sel[3];
+    OUT out[16];
+
+    PARTS:
+
+    // Round 1: sel[0] picks within each pair of inputs
+    Mux16(a=a, b=b, sel=sel[0], out=winnerAB);
+    Mux16(a=c, b=d, sel=sel[0], out=winnerCD);
+    Mux16(a=e, b=f, sel=sel[0], out=winnerEF);
+    Mux16(a=g, b=h, sel=sel[0], out=winnerGH);
+
+    // Round 2: sel[1] picks between the round 1 winners
+    Mux16(a=winnerAB, b=winnerCD, sel=sel[1], out=winnerABCD);
+    Mux16(a=winnerEF, b=winnerGH, sel=sel[1], out=winnerEFGH);
+
+    // Round 3: sel[2] picks the final champion
+    Mux16(a=winnerABCD, b=winnerEFGH, sel=sel[2], out=out);
+}

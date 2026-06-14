@@ -1,0 +1,42 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/1/Mux4Way16.hdl
+/**
+ * Mux4Way16 — 4-way 16-bit Multiplexer.
+ *
+ * Chooses ONE of four 16-bit inputs (a, b, c, d) based on a 2-bit sel.
+ *
+ * sel is 2 bits, giving 4 possible combinations:
+ *   sel=00 → out = a
+ *   sel=01 → out = b
+ *   sel=10 → out = c
+ *   sel=11 → out = d
+ *
+ * Strategy: use a TOURNAMENT (two rounds of elimination)
+ *
+ *   Round 1: two Mux16s each pick a winner from their pair
+ *     - sel[0] picks between a and b  → winner AB
+ *     - sel[0] picks between c and d  → winner CD
+ *
+ *   Round 2: one Mux16 picks the final winner
+ *     - sel[1] picks between AB and CD → final out
+ *
+ * Think of it like a sports bracket:
+ *   [a vs b] → AB winner
+ *   [c vs d] → CD winner
+ *   [AB vs CD] → champion (out)
+ */
+CHIP Mux4Way16 {
+    IN  a[16], b[16], c[16], d[16], sel[2];
+    OUT out[16];
+
+    PARTS:
+
+    // Round 1: sel[0] picks within each pair
+    Mux16(a=a, b=b, sel=sel[0], out=winnerAB);   // sel[0]=0 → a wins, sel[0]=1 → b wins
+    Mux16(a=c, b=d, sel=sel[0], out=winnerCD);   // sel[0]=0 → c wins, sel[0]=1 → d wins
+
+    // Round 2: sel[1] picks the final winner
+    Mux16(a=winnerAB, b=winnerCD, sel=sel[1], out=out);  // sel[1]=0 → AB, sel[1]=1 → CD
+}

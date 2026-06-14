@@ -1,0 +1,44 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/1/DMux4Way.hdl
+/**
+ * DMux4Way — 1-to-4 Demultiplexer.
+ *
+ * Takes one input and routes it to ONE of four outputs (a, b, c, d).
+ * The other three outputs get 0.
+ *
+ * sel is 2 bits:
+ *   sel=00 → a=in, b=0,  c=0,  d=0
+ *   sel=01 → a=0,  b=in, c=0,  d=0
+ *   sel=10 → a=0,  b=0,  c=in, d=0
+ *   sel=11 → a=0,  b=0,  c=0,  d=in
+ *
+ * Strategy: opposite of Mux4Way — two rounds of splitting (reverse tournament)
+ *
+ *   Round 1 (sel[1]): route to first half (a,b) OR second half (c,d)
+ *     - sel[1]=0 → signal goes toward a,b
+ *     - sel[1]=1 → signal goes toward c,d
+ *
+ *   Round 2 (sel[0]): within the chosen half, route to the exact output
+ *     - sel[0]=0 → signal goes to first of the pair  (a or c)
+ *     - sel[0]=1 → signal goes to second of the pair (b or d)
+ *
+ * Think of it like a postal sorting system:
+ *   First sort by region (sel[1]), then by street (sel[0]).
+ */
+CHIP DMux4Way {
+    IN  in, sel[2];
+    OUT a, b, c, d;
+
+    PARTS:
+
+    // Round 1: use sel[1] to route to the first half or the second half
+    DMux(in=in, sel=sel[1], a=firstHalf, b=secondHalf);
+    //   sel[1]=0 → firstHalf gets the signal (routes to a or b)
+    //   sel[1]=1 → secondHalf gets the signal (routes to c or d)
+
+    // Round 2: use sel[0] to pick the exact output within each half
+    DMux(in=firstHalf,  sel=sel[0], a=a, b=b);  // sel[0]=0 → a, sel[0]=1 → b
+    DMux(in=secondHalf, sel=sel[0], a=c, b=d);  // sel[0]=0 → c, sel[0]=1 → d
+}

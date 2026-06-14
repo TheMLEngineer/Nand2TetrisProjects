@@ -1,0 +1,35 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/1/DMux.hdl
+/**
+ * DMux (Demultiplexer) — opposite of Mux.
+ *
+ * Mux  : two inputs  → one output  (select which input to use)
+ * DMux : one input   → two outputs (select where to send the input)
+ *
+ * Think of it like a train switch:
+ *   - One train (in) arrives
+ *   - sel decides which track (a or b) it goes to
+ *   - The other track gets nothing (0)
+ *
+ * if (sel == 0): a = in,  b = 0
+ * if (sel == 1): a = 0,   b = in
+ */
+CHIP DMux {
+    IN  in, sel;
+    OUT a, b;
+
+    PARTS:
+
+    // Flip sel so we have the opposite
+    Not(in=sel, out=notSel);
+
+    // Output a gets the input only when sel=0 (notSel=1)
+    // When sel=1, a is blocked (outputs 0)
+    And(a=in, b=notSel, out=a);
+
+    // Output b gets the input only when sel=1
+    // When sel=0, b is blocked (outputs 0)
+    And(a=in, b=sel, out=b);
+}

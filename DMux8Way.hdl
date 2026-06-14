@@ -1,0 +1,43 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/1/DMux8Way.hdl
+/**
+ * DMux8Way — 1-to-8 Demultiplexer.
+ *
+ * Takes one input and routes it to ONE of eight outputs (a..h).
+ * The other seven outputs get 0.
+ *
+ * sel is 3 bits:
+ *   sel=000 → a=in, all others 0
+ *   sel=001 → b=in, all others 0
+ *   sel=010 → c=in, all others 0
+ *   sel=011 → d=in, all others 0
+ *   sel=100 → e=in, all others 0
+ *   sel=101 → f=in, all others 0
+ *   sel=110 → g=in, all others 0
+ *   sel=111 → h=in, all others 0
+ *
+ * Strategy: three rounds of splitting (reverse tournament)
+ *
+ *   Round 1 (sel[2]): route to first group (a,b,c,d) OR second group (e,f,g,h)
+ *   Round 2+3: use DMux4Way with sel[0..1] to pick the exact output within each group
+ *
+ * Think of it like a postal sorting system:
+ *   First sort by country (sel[2]), then by region and street (sel[1..0]).
+ */
+CHIP DMux8Way {
+    IN  in, sel[3];
+    OUT a, b, c, d, e, f, g, h;
+
+    PARTS:
+
+    // Round 1: use sel[2] to split into two groups of 4
+    DMux(in=in, sel=sel[2], a=firstGroup, b=secondGroup);
+    //   sel[2]=0 → signal goes toward a,b,c,d
+    //   sel[2]=1 → signal goes toward e,f,g,h
+
+    // Round 2+3: use DMux4Way with sel[0..1] to find the exact output in each group
+    DMux4Way(in=firstGroup,  sel=sel[0..1], a=a, b=b, c=c, d=d);
+    DMux4Way(in=secondGroup, sel=sel[0..1], a=e, b=f, c=g, d=h);
+}
