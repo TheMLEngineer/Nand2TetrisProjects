@@ -1,0 +1,33 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/1/Mux.hdl
+/**
+ * Mux (Multiplexer):
+ * if (sel == 0) out = a
+ * if (sel == 1) out = b
+ */
+CHIP Mux {
+    IN a, b, sel;
+    OUT out;
+
+    PARTS:
+
+    // Step 1: Flip sel so we have the opposite of sel
+    // sel=0 becomes 1, sel=1 becomes 0
+    Not(in=sel, out=notSel);
+
+    // Step 2: Gate input A
+    // A only passes through when sel=0 (notSel=1)
+    // When sel=1, this produces 0 (A is blocked)
+    And(a=a, b=notSel, out=aPassedThrough);
+
+    // Step 3: Gate input B
+    // B only passes through when sel=1
+    // When sel=0, this produces 0 (B is blocked)
+    And(a=b, b=sel, out=bPassedThrough);
+
+    // Step 4: Merge results
+    // One of the two is always 0, so OR just passes the surviving signal
+    Or(a=aPassedThrough, b=bPassedThrough, out=out);
+}
